@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "f": {
+      "tag": "brewinandchewin:cheese"
+    },
+    "m": {
+      "item": "minecraft:brown_mushroom"
+    },
+    "p": {
+      "tag": "brewinandchewin:supreme_pizza_toppings"
+    },
+    "o": {
+      "tag": "forge:crops/onion"
+    },
+    "t": {
+      "tag": "forge:crops/tomato"
+    },
+    "d": {
+      "tag": "forge:dough"
+    }
+  },
+  "pattern": [
+    "fff",
+    "mpo",
+    "tdt"
+  ],
+  "result": {
+    "item": "brewinandchewin:supreme_pizza"
+  }
+}

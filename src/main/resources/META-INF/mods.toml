@@ -4,13 +4,13 @@ license="MIT License"
 
 [[mods]]
 modId="brewinandchewin"
-version="1.19-2.0"
-displayName="Farmer's Respite"
+version="1.20.1-2.0"
+displayName="Brewin' and Chewin'"
 # updateJSONURL=""
 logoFile="logo.png"
 logoBlur=false
-credits="Umpaz, Probleyes, SoyTutta"
-authors="Umpaz, Probleyes"
+credits="Umpaz, Probleyes, SoyTutta, j-cob44"
+authors="Umpaz, Probleyes, j-cob44"
 description="An addon for the Farmer's Delight mod centered around brewing tea and coffee in the kettle"
 itemIcon="farmersrespite:kettle"
 configBackground="minecraft:textures/block/bricks.png"
@@ -18,20 +18,20 @@ configBackground="minecraft:textures/block/bricks.png"
 [[dependencies.brewinandchewin]]
     modId="forge"
     mandatory=true
-    versionRange="[41.1.0,)"
+    versionRange="[47.1.0,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.brewinandchewin]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19,1.20)"
+    versionRange="[1.20,1.21)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.brewinandchewin]]
 modId="farmersdelight"
 mandatory=true
-versionRange="[1.19,1.20)"
+versionRange="[1.20,1.21)"
 ordering="NONE"
 side="BOTH"

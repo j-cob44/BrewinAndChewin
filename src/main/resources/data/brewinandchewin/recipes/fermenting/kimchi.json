@@ -1,0 +1,22 @@
+{
+  "type": "brewinandchewin:fermenting",
+  "experience": 0.6,
+  "fermentingtime": 12000,
+  "ingredients": [
+    {
+      "item": "farmersdelight:cabbage_leaf"
+    },
+    {
+      "tag": "forge:vegetables"
+    },
+    {
+      "item": "minecraft:kelp"
+    }
+  ],
+  "recipe_book_tab": "misc",
+  "result": {
+    "count": 2,
+    "item": "brewinandchewin:kimchi"
+  },
+  "temperature": "warm"
+}

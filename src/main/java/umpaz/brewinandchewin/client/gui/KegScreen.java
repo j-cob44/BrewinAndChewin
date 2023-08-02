@@ -1,8 +1,8 @@
 package umpaz.brewinandchewin.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
@@ -30,7 +30,7 @@ import java.util.List;
 public class KegScreen extends AbstractContainerScreen<KegMenu> implements RecipeUpdateListener
 {
     private static final ResourceLocation RECIPE_BUTTON_LOCATION = new ResourceLocation("textures/gui/recipe_button.png");
-    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(BrewinAndChewin.MODID, "textures/gui/keg.png");
+    private static final ResourceLocation BACKGROUND_TEXTURE_LOCATION = new ResourceLocation(BrewinAndChewin.MODID, "textures/gui/keg.png");
     private static final Rectangle PROGRESS_ARROW = new Rectangle(77, 44, 0, 9);
     private static final Rectangle FRIGID_BAR = new Rectangle(77, 39, 6, 4);
     private static final Rectangle COLD_BAR = new Rectangle(83, 39, 7, 4);
@@ -78,46 +78,47 @@ public class KegScreen extends AbstractContainerScreen<KegMenu> implements Recip
     }
 
     @Override
-    public void render(PoseStack ms, final int mouseX, final int mouseY, float partialTicks) {
-        this.renderBackground(ms);
+    public void render(GuiGraphics gui, final int mouseX, final int mouseY, float partialTicks) {
+        this.renderBackground(gui);
 
         if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-            this.renderBg(ms, partialTicks, mouseX, mouseY);
-            this.recipeBookComponent.render(ms, mouseX, mouseY, partialTicks);
+            this.renderBg(gui, partialTicks, mouseX, mouseY);
+            this.recipeBookComponent.render(gui, mouseX, mouseY, partialTicks);
         } else {
-            this.recipeBookComponent.render(ms, mouseX, mouseY, partialTicks);
-            super.render(ms, mouseX, mouseY, partialTicks);
-            this.recipeBookComponent.renderGhostRecipe(ms, this.leftPos, this.topPos, false, partialTicks);
+            this.recipeBookComponent.render(gui, mouseX, mouseY, partialTicks);
+            super.render(gui, mouseX, mouseY, partialTicks);
+            this.recipeBookComponent.renderGhostRecipe(gui, this.leftPos, this.topPos, false, partialTicks);
         }
 
-        this.renderTemperatureTooltip(ms, mouseX, mouseY);
-        this.renderDrinkDisplayTooltip(ms, mouseX, mouseY);
-        this.recipeBookComponent.renderTooltip(ms, this.leftPos, this.topPos, mouseX, mouseY);
+        this.renderTemperatureTooltip(gui, mouseX, mouseY);
+        this.renderDrinkDisplayTooltip(gui, mouseX, mouseY);
+        this.recipeBookComponent.renderTooltip(gui, this.leftPos, this.topPos, mouseX, mouseY);
     }
 
-    private void renderTemperatureTooltip(PoseStack ms, int mouseX, int mouseY) {
+    private void renderTemperatureTooltip(GuiGraphics gui, int mouseX, int mouseY) {
         if (this.isHovering(77, 39, 27, 4, mouseX, mouseY)) {
             List<Component> tooltip = new ArrayList<>();
             MutableComponent key = null;
             int i = this.menu.getTemperature();
 
-            if (i < -4) {
+            if (i < -3) {
                 key = BCTextUtils.getTranslation("container.keg.frigid", i);
-            } else if (i < -1) {
+            } else if (i < 0) {
                 key = BCTextUtils.getTranslation("container.keg.cold", i);
-            } else if (i < 2) {
+            } else if (i < 1) {
                 key = BCTextUtils.getTranslation("container.keg.normal", i);
-            } else if (i < 5) {
+            } else if (i < 4) {
                 key = BCTextUtils.getTranslation("container.keg.warm", i);
             } else {
                 key = BCTextUtils.getTranslation("container.keg.hot", i);
             }
             tooltip.add(key);
-            this.renderComponentTooltip(ms, tooltip, mouseX, mouseY);
+
+            gui.renderComponentTooltip(this.font, tooltip, mouseX, mouseY);
         }
     }
 
-    protected void renderDrinkDisplayTooltip(PoseStack ms, int mouseX, int mouseY) {
+    protected void renderDrinkDisplayTooltip(GuiGraphics ms, int mouseX, int mouseY) {
         if (this.minecraft != null && this.minecraft.player != null && this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
             if (this.hoveredSlot.index == 5) {
                 List<Component> tooltip = new ArrayList<>();
@@ -130,50 +131,51 @@ public class KegScreen extends AbstractContainerScreen<KegMenu> implements Recip
 
                 tooltip.add(TextUtils.getTranslation("container.cooking_pot.served_on", container).withStyle(ChatFormatting.GRAY));
 
-                this.renderComponentTooltip(ms, tooltip, mouseX, mouseY);
+                ms.renderComponentTooltip(this.font, tooltip, mouseX, mouseY);
             } else {
-                this.renderTooltip(ms, this.hoveredSlot.getItem(), mouseX, mouseY);
+                this.renderTooltip(ms, mouseX, mouseY);
             }
         }
     }
 
     @Override
-    protected void renderLabels(PoseStack ms, int mouseX, int mouseY) {
-        super.renderLabels(ms, mouseX, mouseY);
-        this.font.draw(ms, this.playerInventoryTitle, 8.0f, (float) (this.imageHeight - 96 + 2), 4210752);
+    protected void renderLabels(GuiGraphics gui, int mouseX, int mouseY) {
+        super.renderLabels(gui, mouseX, mouseY);
+
+        gui.drawString(this.font, this.playerInventoryTitle, (int) 8.0f, (this.imageHeight - 96 + 2), 4210752, false);
     }
 
     @Override
-    protected void renderBg(PoseStack ms, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(GuiGraphics gui, float partialTicks, int mouseX, int mouseY) {
         // Render UI background
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.minecraft == null)
             return;
 
-        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
-        this.blit(ms, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE_LOCATION);
+        gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         // Render progress arrow
         int l = this.menu.getFermentProgressionScaled();
-        this.blit(ms, this.leftPos + PROGRESS_ARROW.x, this.topPos + PROGRESS_ARROW.y, 176, 28, l + 1, PROGRESS_ARROW.height);
+        gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos + PROGRESS_ARROW.x, this.topPos + PROGRESS_ARROW.y, 176, 28, l + 1, PROGRESS_ARROW.height);
 
         int temp = this.menu.getTemperature();
-        if (temp < -1) {
-            this.blit(ms, this.leftPos + COLD_BAR.x, this.topPos + COLD_BAR.y, 182, 0, COLD_BAR.width, COLD_BAR.height);
-        } if (temp < -4) {
-            this.blit(ms, this.leftPos + FRIGID_BAR.x, this.topPos + FRIGID_BAR.y, 176, 0, FRIGID_BAR.width, FRIGID_BAR.height);
-        } if (temp > 1) {
-            this.blit(ms, this.leftPos + WARM_BAR.x, this.topPos + WARM_BAR.y, 195, 0, WARM_BAR.width, WARM_BAR.height);
-        } if (temp > 4) {
-            this.blit(ms, this.leftPos + HOT_BAR.x, this.topPos + HOT_BAR.y, 202, 0, HOT_BAR.width, HOT_BAR.height);
+        if (temp < 0) {
+            gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos + COLD_BAR.x, this.topPos + COLD_BAR.y, 182, 0, COLD_BAR.width, COLD_BAR.height);
+        } if (temp < -3) {
+            gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos + FRIGID_BAR.x, this.topPos + FRIGID_BAR.y, 176, 0, FRIGID_BAR.width, FRIGID_BAR.height);
+        } if (temp > 0) {
+            gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos + WARM_BAR.x, this.topPos + WARM_BAR.y, 195, 0, WARM_BAR.width, WARM_BAR.height);
+        } if (temp > 3) {
+            gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos + HOT_BAR.x, this.topPos + HOT_BAR.y, 202, 0, HOT_BAR.width, HOT_BAR.height);
         }
 
         int i = this.menu.getFermentingTicks();
         if (i > 0) {
             int j;
             j = BUBBLELENGTHS[i / 5 % 7];
-            this.blit(ms, this.leftPos + BUBBLE_1.x, this.topPos + BUBBLE_1.y, 176, 4, BUBBLE_1.width, BUBBLE_1.height - j);
-            this.blit(ms, this.leftPos + BUBBLE_2.x, this.topPos + BUBBLE_2.y, 186, 4, BUBBLE_2.width, BUBBLE_2.height - j);
+            gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos + BUBBLE_1.x, this.topPos + BUBBLE_1.y, 176, 4, BUBBLE_1.width, BUBBLE_1.height - j);
+            gui.blit(BACKGROUND_TEXTURE_LOCATION, this.leftPos + BUBBLE_2.x, this.topPos + BUBBLE_2.y, 186, 4, BUBBLE_2.width, BUBBLE_2.height - j);
         }
     }
 
@@ -210,7 +212,7 @@ public class KegScreen extends AbstractContainerScreen<KegMenu> implements Recip
 
     @Override
     public void removed() {
-        this.recipeBookComponent.removed();
+//        this.recipeBookComponent.removed();
         super.removed();
     }
 

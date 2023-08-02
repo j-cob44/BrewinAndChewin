@@ -1,9 +1,17 @@
 package umpaz.brewinandchewin.common.crafting;
 
+import net.minecraft.core.Registry;
+import umpaz.brewinandchewin.BrewinAndChewin;
+import umpaz.brewinandchewin.client.recipebook.KegRecipeBookTab;
+import umpaz.brewinandchewin.common.registry.BCItems;
+import umpaz.brewinandchewin.common.registry.BCRecipeSerializers;
+import umpaz.brewinandchewin.common.registry.BCRecipeTypes;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -13,11 +21,7 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
-import umpaz.brewinandchewin.BrewinAndChewin;
-import umpaz.brewinandchewin.client.recipebook.KegRecipeBookTab;
-import umpaz.brewinandchewin.common.registry.BCItems;
-import umpaz.brewinandchewin.common.registry.BCRecipeSerializers;
-import umpaz.brewinandchewin.common.registry.BCRecipeTypes;
+
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -25,6 +29,7 @@ import java.util.EnumSet;
 @SuppressWarnings("ClassCanBeRecord")
 public class KegRecipe implements Recipe<RecipeWrapper>
 {
+    public static final Serializer SERIALIZER = new Serializer();
     public static final int INPUT_SLOTS = 4;
 
     private final ResourceLocation id;
@@ -89,7 +94,7 @@ public class KegRecipe implements Recipe<RecipeWrapper>
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(RegistryAccess access) {
         return this.output;
     }
 
@@ -98,7 +103,7 @@ public class KegRecipe implements Recipe<RecipeWrapper>
     }
 
     @Override
-    public ItemStack assemble(RecipeWrapper inv) {
+    public ItemStack assemble(RecipeWrapper inv, RegistryAccess access) {
         return this.output.copy();
     }
 
@@ -131,7 +136,7 @@ public class KegRecipe implements Recipe<RecipeWrapper>
             }
         }
         if (this.fluidItem != null) {
-            return i == ingredientsList.size() && net.minecraftforge.common.util.RecipeMatcher.findMatches(inputs, ingredientsList) != null && inv.getItem(4).sameItem(fluidItem);
+            return i == ingredientsList.size() && net.minecraftforge.common.util.RecipeMatcher.findMatches(inputs, ingredientsList) != null && ItemStack.isSameItem(inv.getItem(4), fluidItem);
         }
         return i == ingredientsList.size() && net.minecraftforge.common.util.RecipeMatcher.findMatches(inputs, ingredientsList) != null;
     }

@@ -1,5 +1,13 @@
 package umpaz.brewinandchewin.common.block.entity.container;
 
+import vectorwing.farmersdelight.common.block.entity.container.CookingPotMealSlot;
+
+import umpaz.brewinandchewin.BrewinAndChewin;
+import umpaz.brewinandchewin.common.block.entity.KegBlockEntity;
+import umpaz.brewinandchewin.common.block.entity.inventory.KegServerPlaceRecipe;
+import umpaz.brewinandchewin.common.registry.BCBlocks;
+import umpaz.brewinandchewin.common.registry.BCMenuTypes;
+
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.recipebook.ServerPlaceRecipe;
@@ -19,12 +27,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
-import umpaz.brewinandchewin.BrewinAndChewin;
-import umpaz.brewinandchewin.common.block.entity.KegBlockEntity;
-import umpaz.brewinandchewin.common.block.entity.inventory.KegServerPlaceRecipe;
-import umpaz.brewinandchewin.common.registry.BCBlocks;
-import umpaz.brewinandchewin.common.registry.BCMenuTypes;
-import vectorwing.farmersdelight.common.block.entity.container.CookingPotMealSlot;
 
 import java.util.Objects;
 
@@ -43,7 +45,7 @@ public class KegMenu extends RecipeBookMenu<RecipeWrapper>
         this.tileEntity = tileEntity;
         this.inventory = tileEntity.getInventory();
         this.kegData = kegDataIn;
-        this.level = playerInventory.player.level;
+        this.level = playerInventory.player.level();
         this.canInteractWithCallable = ContainerLevelAccess.create(tileEntity.getLevel(), tileEntity.getBlockPos());
 
         // Ingredient Slots - 2 Rows x 2 Columns
@@ -98,7 +100,7 @@ public class KegMenu extends RecipeBookMenu<RecipeWrapper>
     private static KegBlockEntity getTileEntity(final Inventory playerInventory, final FriendlyByteBuf data) {
         Objects.requireNonNull(playerInventory, "playerInventory cannot be null");
         Objects.requireNonNull(data, "data cannot be null");
-        final BlockEntity tileAtPos = playerInventory.player.level.getBlockEntity(data.readBlockPos());
+        final BlockEntity tileAtPos = playerInventory.player.level().getBlockEntity(data.readBlockPos());
         if (tileAtPos instanceof KegBlockEntity) {
             return (KegBlockEntity) tileAtPos;
         }

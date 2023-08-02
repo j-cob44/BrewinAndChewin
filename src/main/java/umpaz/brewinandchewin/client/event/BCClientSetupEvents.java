@@ -23,9 +23,9 @@ public class BCClientSetupEvents {
 		BCRecipeCategories.init(event);
 	}
 
-	@SubscribeEvent
-	public static void onStitchEvent(TextureStitchEvent.Pre event) {
-		event.addSprite(EMPTY_CONTAINER_SLOT_MUG);
-	}
+//	@SubscribeEvent
+//	public static void onStitchEvent(TextureStitchEvent.Pre event) {
+//		event.addSprite(EMPTY_CONTAINER_SLOT_MUG);
+//	}
 
 }

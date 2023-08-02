@@ -1,11 +1,26 @@
 package umpaz.brewinandchewin.common.block.entity;
 
+import com.mojang.brigadier.Message;
+import net.minecraft.client.Minecraft;
+import umpaz.brewinandchewin.BrewinAndChewin;
+import vectorwing.farmersdelight.common.block.entity.SyncedBlockEntity;
+import vectorwing.farmersdelight.common.mixin.accessor.RecipeManagerAccessor;
+import vectorwing.farmersdelight.common.tag.ModTags;
+import vectorwing.farmersdelight.common.utility.ItemUtils;
+
+import umpaz.brewinandchewin.common.block.KegBlock;
+import umpaz.brewinandchewin.common.block.entity.container.KegMenu;
+import umpaz.brewinandchewin.common.block.entity.inventory.KegItemHandler;
+import umpaz.brewinandchewin.common.crafting.KegRecipe;
+import umpaz.brewinandchewin.common.registry.BCBlockEntityTypes;
+import umpaz.brewinandchewin.common.registry.BCItems;
+import umpaz.brewinandchewin.common.registry.BCRecipeTypes;
+import umpaz.brewinandchewin.common.utility.BCTextUtils;
+
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
+import net.minecraft.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -27,23 +42,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
+//import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
-import umpaz.brewinandchewin.common.block.KegBlock;
-import umpaz.brewinandchewin.common.block.entity.container.KegMenu;
-import umpaz.brewinandchewin.common.block.entity.inventory.KegItemHandler;
-import umpaz.brewinandchewin.common.crafting.KegRecipe;
-import umpaz.brewinandchewin.common.registry.BCBlockEntityTypes;
-import umpaz.brewinandchewin.common.registry.BCItems;
-import umpaz.brewinandchewin.common.registry.BCRecipeTypes;
-import umpaz.brewinandchewin.common.utility.BCTextUtils;
-import vectorwing.farmersdelight.common.block.entity.SyncedBlockEntity;
-import vectorwing.farmersdelight.common.mixin.accessor.RecipeManagerAccessor;
-import vectorwing.farmersdelight.common.tag.ModTags;
-import vectorwing.farmersdelight.common.utility.ItemUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -162,8 +166,8 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
         boolean didInventoryChange = false;
         if (keg.hasInput()) {
             Optional<KegRecipe> recipe = keg.getMatchingRecipe(new RecipeWrapper(keg.inventory));
-            if (recipe.isPresent() && keg.canFerment(recipe.get())) {
-                didInventoryChange = keg.processFermenting(recipe.get(), keg);
+            if (recipe.isPresent() && keg.canFerment(recipe.get(), level)) {
+                didInventoryChange = keg.processFermenting(recipe.get(), keg, level);
             } else {
                 keg.fermentTime = 0;
             }
@@ -226,16 +230,17 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
         }
     }
 
+    // Temperature Breakpoints
     public String getTemperature() {
-        if (kegTemperature < -4) {
+        if (kegTemperature < -3) {
             return "frigid";
-        } else if (kegTemperature < -1) {
+        } else if (kegTemperature < 0) {
             return "cold";
-        } else if (kegTemperature < 2) {
+        } else if (kegTemperature < 1) {
             return "normal";
-        } else if (kegTemperature < 5) {
+        } else if (kegTemperature < 4) {
             return "warm";
-        } else if (kegTemperature > 4) {
+        } else if (3 < kegTemperature) {
             return "hot";
         }
         return "normal";
@@ -255,7 +260,8 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
                 if (recipe.matches(inventoryWrapper, level)) {
                     return Optional.of((KegRecipe) recipe);
                 }
-                if (recipe.getResultItem().sameItem(getDrink())) {
+
+                if(ItemStack.isSameItem(((KegRecipe) recipe).getResultItem(level.registryAccess()), getDrink())){
                     return Optional.empty();
                 }
             }
@@ -288,17 +294,18 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
         return false;
     }
 
-    protected boolean canFerment(KegRecipe recipe) {
+    protected boolean canFerment(KegRecipe recipe, Level level) {
         String recipeTemp = recipe.getTemperature();
-        if (hasInput() && (recipeTemp.equals("normal") || recipeTemp.equals(getTemperature()))) {
-            ItemStack resultStack = recipe.getResultItem();
+
+        if (hasInput() && (recipeTemp.equals(getTemperature()))) {
+            ItemStack resultStack = recipe.getResultItem(level.registryAccess());
             if (resultStack.isEmpty()) {
                 return false;
             } else {
                 ItemStack storedMealStack = inventory.getStackInSlot(DRINK_DISPLAY_SLOT);
                 if (storedMealStack.isEmpty()) {
                     return true;
-                } else if (!storedMealStack.sameItem(resultStack)) {
+                } else if (!ItemStack.isSameItem(storedMealStack, resultStack)) {
                     return false;
                 } else if (storedMealStack.getCount() + resultStack.getCount() <= inventory.getSlotLimit(DRINK_DISPLAY_SLOT)) {
                     return true;
@@ -311,7 +318,7 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
         }
     }
 
-    private boolean processFermenting(KegRecipe recipe, KegBlockEntity keg) {
+    private boolean processFermenting(KegRecipe recipe, KegBlockEntity keg, Level level) {
         if (level == null) return false;
 
         ++fermentTime;
@@ -322,11 +329,11 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
 
         fermentTime = 0;
         drinkContainerStack = recipe.getOutputContainer();
-        ItemStack resultStack = recipe.getResultItem();
+        ItemStack resultStack = recipe.getResultItem(level.registryAccess());
         ItemStack storedDrinkStack = inventory.getStackInSlot(DRINK_DISPLAY_SLOT);
         if (storedDrinkStack.isEmpty()) {
             inventory.setStackInSlot(DRINK_DISPLAY_SLOT, resultStack.copy());
-        } else if (storedDrinkStack.sameItem(resultStack)) {
+        } else if (ItemStack.isSameItem(storedDrinkStack, resultStack)) {
             storedDrinkStack.grow(resultStack.getCount());
         }
         keg.setRecipeUsed(recipe);
@@ -361,9 +368,9 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
         return null;
     }
 
-    @Override
+    //@Override
     public void awardUsedRecipes(Player player) {
-        List<Recipe<?>> usedRecipes = getUsedRecipesAndPopExperience(player.level, player.position());
+        List<Recipe<?>> usedRecipes = getUsedRecipesAndPopExperience(player.level(), player.position());
         player.awardRecipes(usedRecipes);
         usedRecipeTracker.clear();
     }
@@ -455,9 +462,9 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
     public boolean isContainerValid(ItemStack containerItem) {
         if (containerItem.isEmpty()) return false;
         if (!drinkContainerStack.isEmpty()) {
-            return drinkContainerStack.sameItem(containerItem);
+            return ItemStack.isSameItem(drinkContainerStack, containerItem);
         } else {
-            return getDrink().getCraftingRemainingItem().sameItem(containerItem);
+            return ItemStack.isSameItem(getDrink().getCraftingRemainingItem(), containerItem);
         }
     }
 
@@ -489,7 +496,7 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
     @Override
     @Nonnull
     public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-        if (cap.equals(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)) {
+        if (cap.equals(ForgeCapabilities.ITEM_HANDLER)) {
             if (side == null || side.equals(Direction.UP)) {
                 return inputHandler.cast();
             } else {

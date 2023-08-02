@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "f": {
+      "tag": "brewinandchewin:cheese"
+    },
+    "t": {
+      "tag": "forge:crops/tomato"
+    },
+    "d": {
+      "tag": "forge:dough"
+    }
+  },
+  "pattern": [
+    "fff",
+    "tdt"
+  ],
+  "result": {
+    "item": "brewinandchewin:cheese_pizza"
+  }
+}

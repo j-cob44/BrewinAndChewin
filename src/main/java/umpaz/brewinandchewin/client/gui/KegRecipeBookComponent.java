@@ -2,6 +2,7 @@ package umpaz.brewinandchewin.client.gui;
 
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
@@ -39,11 +40,11 @@ public class KegRecipeBookComponent extends RecipeBookComponent
         NonNullList<Ingredient> ingredientsList = NonNullList.create();
         ingredientsList.addAll(recipe.getIngredients());
         ingredientsList.remove(ingredientsList.size() - 1);
-        ItemStack resultStack = recipe.getResultItem();
+//        ItemStack resultStack = recipe.getResultItem();
         this.ghostRecipe.setRecipe(recipe);
-        if (slots.get(5).getItem().isEmpty()) {
-            this.ghostRecipe.addIngredient(Ingredient.of(resultStack), (slots.get(5)).x, (slots.get(5)).y);
-        }
+//        if (slots.get(5).getItem().isEmpty()) {
+//            this.ghostRecipe.addIngredient(Ingredient.of(resultStack), (slots.get(5)).x, (slots.get(5)).y);
+//        }
 
         if (recipe instanceof KegRecipe fermentingRecipe) {
             ItemStack containerStack = fermentingRecipe.getOutputContainer();

@@ -5,6 +5,8 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,8 +15,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraftforge.registries.RegistryObject;
 import umpaz.brewinandchewin.common.crafting.KegRecipe;
 
 import javax.annotation.Nullable;
@@ -38,7 +42,7 @@ public class KegServerPlaceRecipe<C extends Container> implements PlaceRecipe<In
                 player.getInventory().fillStackedContents(this.stackedContents);
                 this.menu.fillCraftSlotsStackedContents(this.stackedContents);
                 if (recipe instanceof KegRecipe fermentableRecipe) {
-                    if (this.stackedContents.canCraft(recipe, (IntList) null) && this.stackedContents.contents.containsKey(Registry.ITEM.getId(fermentableRecipe.getFluidItem().getItem()))) {
+                    if (this.stackedContents.canCraft(recipe, (IntList) null) && this.stackedContents.contents.containsKey(Item.getId(fermentableRecipe.getFluidItem().getItem()))) {
                         this.handleRecipeClicked(recipe, p_135437_);
                         this.moveItemToGrid(menu.getSlot(4), fermentableRecipe.getFluidItem());
                     } else {
@@ -169,7 +173,7 @@ public class KegServerPlaceRecipe<C extends Container> implements PlaceRecipe<In
                     int k = this.inventory.getSlotWithRemainingSpace(itemstack);
                     if (k == -1 && list.size() <= i) {
                         for(ItemStack itemstack1 : list) {
-                            if (itemstack1.sameItem(itemstack) && itemstack1.getCount() != itemstack1.getMaxStackSize() && itemstack1.getCount() + itemstack.getCount() <= itemstack1.getMaxStackSize()) {
+                            if (ItemStack.isSameItem(itemstack1, itemstack) && itemstack1.getCount() != itemstack1.getMaxStackSize() && itemstack1.getCount() + itemstack.getCount() <= itemstack1.getMaxStackSize()) {
                                 itemstack1.grow(itemstack.getCount());
                                 itemstack.setCount(0);
                                 break;
