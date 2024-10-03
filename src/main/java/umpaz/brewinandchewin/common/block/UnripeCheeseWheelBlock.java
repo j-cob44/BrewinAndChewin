@@ -62,10 +62,10 @@ public class UnripeCheeseWheelBlock extends Block {
 
     @Override
     public void randomTick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource random) {
-        BrewinAndChewin.LOGGER.error("HERE HERE HERE!!!!! " + worldIn.getRandom().nextFloat());
+//        BrewinAndChewin.LOGGER.error("HERE HERE HERE!!!!! " + worldIn.getRandom().nextFloat());
 
         if (worldIn.isClientSide) {
-            BrewinAndChewin.LOGGER.error("Returning.. :(");
+//            BrewinAndChewin.LOGGER.error("Returning.. :(");
             return;
         }
         if (worldIn.getRandom().nextFloat() <= 0.25F) {

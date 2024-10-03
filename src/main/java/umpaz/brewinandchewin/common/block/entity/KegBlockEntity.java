@@ -3,6 +3,7 @@ package umpaz.brewinandchewin.common.block.entity;
 import com.mojang.brigadier.Message;
 import net.minecraft.client.Minecraft;
 import umpaz.brewinandchewin.BrewinAndChewin;
+import umpaz.brewinandchewin.common.tag.BCTags;
 import vectorwing.farmersdelight.common.block.entity.SyncedBlockEntity;
 import vectorwing.farmersdelight.common.mixin.accessor.RecipeManagerAccessor;
 import vectorwing.farmersdelight.common.tag.ModTags;
@@ -217,7 +218,7 @@ public class KegBlockEntity extends SyncedBlockEntity implements MenuProvider, N
                 }
             }
         }
-        int cold = states.stream().filter(s -> s.is(BlockTags.BIRCH_LOGS)).mapToInt(s -> 1).sum();
+        int cold = states.stream().filter(s -> s.is(BCTags.Blocks.COLD_BLOCKS)).mapToInt(s -> 1).sum();
         float temperature = level.getBiome(worldPosition).get().getBaseTemperature();
         if (temperature <= 0) {
             cold += 2;

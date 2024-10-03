@@ -22,4 +22,12 @@ public class BCTags {
             return ItemTags.create(new ResourceLocation("forge", name));
         }
     }
+
+    public static class Blocks {
+        public static TagKey<Block> COLD_BLOCKS = tag("cold_blocks");
+
+        private static TagKey<Block> tag(String name) {
+            return BlockTags.create(new ResourceLocation(BrewinAndChewin.MODID, name));
+        }
+    }
 }
